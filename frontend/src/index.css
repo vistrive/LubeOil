@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #2563eb;
+  --color-secondary: #64748b;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #06b6d4;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+/* Status indicators */
+.status-dot {
+  @apply w-2 h-2 rounded-full inline-block mr-2;
+}
+
+.status-active {
+  @apply bg-green-500;
+}
+
+.status-warning {
+  @apply bg-yellow-500;
+}
+
+.status-error {
+  @apply bg-red-500;
+}
+
+.status-idle {
+  @apply bg-gray-400;
+}
+
+/* Tank level indicators */
+.tank-level {
+  @apply relative h-24 w-16 border-2 border-gray-400 rounded-b-lg overflow-hidden;
+}
+
+.tank-level-fill {
+  @apply absolute bottom-0 left-0 right-0 transition-all duration-500;
+}
+
+.tank-level-high {
+  @apply bg-yellow-400;
+}
+
+.tank-level-normal {
+  @apply bg-blue-400;
+}
+
+.tank-level-low {
+  @apply bg-red-400;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-blue-500 transition-all duration-300;
+}
+
+/* KPI cards */
+.kpi-card {
+  @apply card flex flex-col;
+}
+
+.kpi-value {
+  @apply text-3xl font-bold text-gray-900;
+}
+
+.kpi-label {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+.kpi-trend-up {
+  @apply text-green-600;
+}
+
+.kpi-trend-down {
+  @apply text-red-600;
+}
+
+/* Table styles */
+.data-table {
+  @apply w-full border-collapse;
+}
+
+.data-table th {
+  @apply text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-4 border-b;
+}
+
+.data-table td {
+  @apply py-3 px-4 border-b border-gray-100;
+}
+
+.data-table tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Button styles */
+.btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center gap-2;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+/* Alarm styles */
+.alarm-critical {
+  @apply bg-red-100 border-l-4 border-red-500 text-red-700;
+}
+
+.alarm-high {
+  @apply bg-orange-100 border-l-4 border-orange-500 text-orange-700;
+}
+
+.alarm-medium {
+  @apply bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700;
+}
+
+.alarm-low {
+  @apply bg-blue-100 border-l-4 border-blue-500 text-blue-700;
+}
