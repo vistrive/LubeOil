@@ -48,8 +48,9 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# Models
+# Models (ML trained models, not source code)
 models/
+!src/lobp/models/
 *.h5
 *.pkl
 *.joblib
