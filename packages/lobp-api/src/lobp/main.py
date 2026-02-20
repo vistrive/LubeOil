@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import structlog
 
-from lobp import __version__
+from lobp.core import __version__
 from lobp.api.v1 import api_router
 from lobp.core.config import settings
 

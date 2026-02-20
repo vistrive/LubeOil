@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "lobp-control-system"
 version = "0.1.0"
-description = "AI-powered Lube Oil Blending Plant Control System"
+description = "AI-powered Lube Oil Blending Plant Control System (meta-package)"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -21,31 +21,35 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+
+# Meta-package: installs all component packages.
+# For lighter CI/CD deploys, install individual packages instead:
+#   pip install lobp-core          # ~6 deps  - models, schemas, DB, config
+#   pip install lobp-ai            # ~3 deps  - AI/ML engine (+ lobp-core)
+#   pip install lobp-llm           # ~3 deps  - LLM providers (+ lobp-core)
+#   pip install lobp-services      # ~5 deps  - business logic (+ lobp-core, lobp-ai)
+#   pip install lobp-api           # ~8 deps  - FastAPI web app (+ lobp-core, lobp-services, lobp-llm)
+#
+# For heavy ML training workloads:
+#   pip install lobp-ai[ml]        # adds tensorflow, scikit-learn, pandas
 dependencies = [
-    "fastapi>=0.109.0",
-    "uvicorn[standard]>=0.27.0",
-    "sqlalchemy>=2.0.25",
-    "alembic>=1.13.1",
-    "pydantic>=2.5.3",
-    "pydantic-settings>=2.1.0",
-    "asyncpg>=0.29.0",
+    "lobp-core==0.1.0",
+    "lobp-ai==0.1.0",
+    "lobp-llm==0.1.0",
+    "lobp-services==0.1.0",
+    "lobp-api==0.1.0",
+    # Infra deps not tied to a specific component
     "redis>=5.0.1",
     "celery>=5.3.6",
-    "numpy>=1.26.3",
-    "pandas>=2.1.4",
-    "scikit-learn>=1.4.0",
-    "tensorflow>=2.15.0",
-    "httpx>=0.26.0",
-    "python-multipart>=0.0.6",
-    "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
     "websockets>=12.0",
     "prometheus-client>=0.19.0",
-    "structlog>=24.1.0",
-    "openpyxl>=3.1.0",
 ]
 
 [project.optional-dependencies]
+# Install everything including heavy ML dependencies
+all = [
+    "lobp-ai[ml]==0.1.0",
+]
 dev = [
     "pytest>=7.4.4",
     "pytest-asyncio>=0.23.3",
@@ -59,9 +63,6 @@ dev = [
 
 [project.scripts]
 lobp = "lobp.cli:main"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/lobp"]
 
 [tool.black]
 line-length = 100

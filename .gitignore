@@ -50,7 +50,7 @@ htmlcov/
 
 # Models (ML trained models, not source code)
 models/
-!src/lobp/models/
+!packages/lobp-core/src/lobp/models/
 *.h5
 *.pkl
 *.joblib
