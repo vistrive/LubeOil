@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from lobp import __version__
+from lobp.core import __version__
 from lobp.db import get_db
 from lobp.schemas.common import HealthCheck
 

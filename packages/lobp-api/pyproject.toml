@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lobp-api"
+version = "0.1.0"
+description = "LOBP Control System - FastAPI web application and REST endpoints"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "LOBP Team" }]
+keywords = ["lube-oil", "blending", "api", "fastapi"]
+dependencies = [
+    "lobp-core==0.1.0",
+    "lobp-services==0.1.0",
+    "lobp-llm==0.1.0",
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "structlog>=24.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.23.3",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.26.0",
+]
+
+[project.scripts]
+lobp = "lobp.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lobp"]
