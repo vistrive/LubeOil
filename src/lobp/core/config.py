@@ -92,6 +92,18 @@ class Settings(BaseSettings):
     supplier_api_timeout_seconds: int = 30
     inventory_forecast_days: int = 7
 
+    # LLM Integration
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-20250514"
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.1"
+    sarvam_api_key: str = ""
+    sarvam_base_url: str = "https://api.sarvam.ai"
+    sarvam_model: str = "sarvam-2b-v0.5"
+    default_llm_provider: str = "openai"
+
 
 @lru_cache
 def get_settings() -> Settings:

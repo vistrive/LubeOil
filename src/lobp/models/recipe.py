@@ -32,6 +32,24 @@ class RecipeStatus(str, enum.Enum):
     ARCHIVED = "archived"
 
 
+class ProductApplication(str, enum.Enum):
+    """Product application/usage classification."""
+
+    ENGINE_OIL = "engine_oil"
+    GEAR_OIL = "gear_oil"
+    HYDRAULIC_OIL = "hydraulic_oil"
+    TRANSMISSION_FLUID = "transmission_fluid"
+    COMPRESSOR_OIL = "compressor_oil"
+    TURBINE_OIL = "turbine_oil"
+    TWO_STROKE_OIL = "two_stroke_oil"
+    INDUSTRIAL_LUBRICANT = "industrial_lubricant"
+    MARINE_OIL = "marine_oil"
+    METALWORKING_FLUID = "metalworking_fluid"
+    GREASE = "grease"
+    TRANSFORMER_OIL = "transformer_oil"
+    OTHER = "other"
+
+
 class IngredientType(str, enum.Enum):
     """Type classification for recipe ingredients."""
 
@@ -71,6 +89,12 @@ class Recipe(BaseModel):
     product_code: Mapped[str | None] = mapped_column(String(50), index=True)
     product_family: Mapped[str | None] = mapped_column(String(100))
     iso_grade: Mapped[str | None] = mapped_column(String(20))
+    product_application: Mapped[ProductApplication | None] = mapped_column(
+        Enum(ProductApplication)
+    )
+    usage_description: Mapped[str | None] = mapped_column(Text)
+    sae_grade: Mapped[str | None] = mapped_column(String(20))
+    formulation_source: Mapped[str | None] = mapped_column(String(50))
 
     # Target quality specifications
     target_viscosity_40c: Mapped[float | None] = mapped_column(Float)

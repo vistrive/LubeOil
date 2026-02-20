@@ -6,6 +6,7 @@ from lobp.models.recipe import (
     RecipeIngredient,
     RecipeStatus,
     IngredientType,
+    ProductApplication,
 )
 from lobp.models.blend import (
     Blend,
@@ -50,6 +51,7 @@ __all__ = [
     "RecipeIngredient",
     "RecipeStatus",
     "IngredientType",
+    "ProductApplication",
     # Blend
     "Blend",
     "BlendIngredient",
