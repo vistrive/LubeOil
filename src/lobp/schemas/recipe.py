@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from lobp.models.recipe import IngredientType, RecipeStatus
+from lobp.models.recipe import IngredientType, ProductApplication, RecipeStatus
 
 
 class RecipeIngredientBase(BaseModel):
@@ -68,6 +68,10 @@ class RecipeBase(BaseModel):
     product_code: str | None = Field(None, max_length=50)
     product_family: str | None = Field(None, max_length=100)
     iso_grade: str | None = Field(None, max_length=20)
+    product_application: ProductApplication | None = None
+    usage_description: str | None = None
+    sae_grade: str | None = Field(None, max_length=20)
+    formulation_source: str | None = Field(None, max_length=50)
 
     # Target quality specifications (matches document format)
     target_viscosity_40c: float | None = Field(None, gt=0, description="Target viscosity @ 40°C in cSt")

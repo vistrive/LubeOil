@@ -9,6 +9,8 @@ import {
   Bell,
   Settings,
   User,
+  Beaker,
+  Bot,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -19,9 +21,11 @@ interface LayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Recipes', href: '/recipes', icon: FlaskConical },
+  { name: 'Formulation', href: '/formulation', icon: Beaker },
   { name: 'Tanks', href: '/tanks', icon: Container },
   { name: 'Blends', href: '/blends', icon: Blend },
   { name: 'Quality', href: '/quality', icon: TestTube2 },
+  { name: 'AI Assistant', href: '/ai-chat', icon: Bot },
 ];
 
 export default function Layout({ children }: LayoutProps) {
