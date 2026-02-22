@@ -160,20 +160,20 @@ export default function Blends() {
                 </td>
                 <td>
                   <div className="flex gap-1">
-                    <button className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded">
+                    <button className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded" aria-label="View details">
                       <Eye className="w-4 h-4" />
                     </button>
                     {blend.status === 'queued' && (
-                      <button className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 rounded">
+                      <button className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 rounded" aria-label="Start blend">
                         <Play className="w-4 h-4" />
                       </button>
                     )}
                     {blend.status === 'in_progress' && (
                       <>
-                        <button className="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-50 rounded">
+                        <button className="p-1.5 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-50 rounded" aria-label="Pause blend">
                           <Pause className="w-4 h-4" />
                         </button>
-                        <button className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded">
+                        <button className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded" aria-label="Stop blend">
                           <StopCircle className="w-4 h-4" />
                         </button>
                       </>
