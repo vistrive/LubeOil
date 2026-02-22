@@ -1,0 +1,80 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: lobp-postgres
+    environment:
+      POSTGRES_USER: lobp
+      POSTGRES_PASSWORD: YTFv|dv3Kvgef
+      POSTGRES_DB: lobp
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5004:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - lobp-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lobp -d lobp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: lobp-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - lobp-network
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: lobp-backend
+    command: python main.py
+    ports:
+      - "5002:8000"
+    networks:
+      - lobp-network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: lobp-frontend
+    ports:
+      - "5001:80"
+    networks:
+      - lobp-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  lobp-network:
+    driver: bridge

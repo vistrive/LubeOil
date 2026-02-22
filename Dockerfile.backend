@@ -1,0 +1,22 @@
+# Simple Backend Dockerfile for LOBP Control System
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+# Create app directory
+WORKDIR /app
+
+# Install only essential packages
+RUN pip install fastapi uvicorn
+
+# Copy the simple main file
+COPY simple_main.py ./main.py
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["python", "main.py"]
+CMD ["uvicorn", "lobp.main:app", "--host", "0.0.0.0", "--port", "8000"]

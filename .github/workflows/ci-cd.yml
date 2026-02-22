@@ -1,0 +1,211 @@
+name: Deploy LOBP Control System (Frontend + Backend + DB)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔑 Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      - name: 🏗️ Build and push backend image
+        run: |
+          USERNAME=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')
+          BACKEND_IMAGE=ghcr.io/$USERNAME/lobp-backend:latest
+          echo "📦 Building backend image: $BACKEND_IMAGE"
+          docker build -t $BACKEND_IMAGE -f Dockerfile.backend .
+          docker push $BACKEND_IMAGE
+
+      - name: 🏗️ Build and push frontend image
+        run: |
+          USERNAME=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')
+          FRONTEND_IMAGE=ghcr.io/$USERNAME/lobp-frontend:latest
+          echo "📦 Building frontend image: $FRONTEND_IMAGE"
+          docker build -t $FRONTEND_IMAGE -f Dockerfile.frontend .
+          docker push $FRONTEND_IMAGE
+
+      - name: 🚀 Deploy to remote server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 20m
+          script: |
+            set -e
+            USERNAME=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')
+            BACKEND_IMAGE=ghcr.io/$USERNAME/lobp-backend:latest
+            FRONTEND_IMAGE=ghcr.io/$USERNAME/lobp-frontend:latest
+            
+            # Container names
+            POSTGRES_CONTAINER=lobp-postgres
+            REDIS_CONTAINER=lobp-redis
+            BACKEND_CONTAINER=lobp-backend
+            FRONTEND_CONTAINER=lobp-frontend
+            NETWORK_NAME=lobp_network
+            
+            echo "🧹 Removing existing containers (if any)..."
+            docker rm -f $BACKEND_CONTAINER $FRONTEND_CONTAINER 2>/dev/null || true
+            
+            echo "🌐 Creating Docker network..."
+            docker network create $NETWORK_NAME || true
+            
+            echo "📦 Pulling latest images..."
+            docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} -p ${{ secrets.GHCR_TOKEN }}
+            docker pull $BACKEND_IMAGE
+            docker pull $FRONTEND_IMAGE
+            
+            echo "🧹 Cleaning old LOBP images (keep latest + 1 previous)..."
+            # Clean backend images
+            BACKEND_IDS=$(docker images ghcr.io/$USERNAME/lobp-backend --format '{{.ID}} {{.CreatedAt}} {{.Tag}}' \
+                         | grep -v 'latest' \
+                         | sort -rk2 \
+                         | awk '{print $1}')
+            TO_KEEP_BACKEND=$(echo "$BACKEND_IDS" | head -n 1)
+            for img in $BACKEND_IDS; do
+              if ! echo "$TO_KEEP_BACKEND" | grep -q "$img"; then
+                echo "🗑️ Removing old backend image: $img"
+                docker rmi -f "$img" || true
+              fi
+            done
+            
+            # Clean frontend images
+            FRONTEND_IDS=$(docker images ghcr.io/$USERNAME/lobp-frontend --format '{{.ID}} {{.CreatedAt}} {{.Tag}}' \
+                          | grep -v 'latest' \
+                          | sort -rk2 \
+                          | awk '{print $1}')
+            TO_KEEP_FRONTEND=$(echo "$FRONTEND_IDS" | head -n 1)
+            for img in $FRONTEND_IDS; do
+              if ! echo "$TO_KEEP_FRONTEND" | grep -q "$img"; then
+                echo "🗑️ Removing old frontend image: $img"
+                docker rmi -f "$img" || true
+              fi
+            done
+            
+            echo "🗄️ Creating volumes..."
+            docker volume create lobp_postgres_data || true
+            docker volume create lobp_redis_data || true
+            
+            echo "🐘 Ensuring PostgreSQL container is running..."
+            if ! docker ps --format '{{.Names}}' | grep -q "^${POSTGRES_CONTAINER}$"; then
+              echo "Starting new PostgreSQL container..."
+              docker rm $POSTGRES_CONTAINER 2>/dev/null || true
+              docker run -d \
+                --name $POSTGRES_CONTAINER \
+                --network $NETWORK_NAME \
+                -e POSTGRES_USER=lobp \
+                -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                -e POSTGRES_DB=lobp \
+                -e PGDATA=/var/lib/postgresql/data/pgdata \
+                -p 5004:5432 \
+                -v lobp_postgres_data:/var/lib/postgresql/data \
+                --restart unless-stopped \
+                postgres:15-alpine
+              echo "⏳ Waiting 15s for PostgreSQL to initialize..."
+              sleep 15
+            else
+              echo "PostgreSQL container already running"
+              docker network connect $NETWORK_NAME $POSTGRES_CONTAINER 2>/dev/null || true
+            fi
+            
+            echo "🔴 Ensuring Redis container is running..."
+            if ! docker ps --format '{{.Names}}' | grep -q "^${REDIS_CONTAINER}$"; then
+              echo "Starting new Redis container..."
+              docker rm $REDIS_CONTAINER 2>/dev/null || true
+              docker run -d \
+                --name $REDIS_CONTAINER \
+                --network $NETWORK_NAME \
+                -p 6380:6379 \
+                -v lobp_redis_data:/data \
+                --restart unless-stopped \
+                redis:7-alpine redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+              echo "⏳ Waiting 5s for Redis to initialize..."
+              sleep 5
+            else
+              echo "Redis container already running"
+              docker network connect $NETWORK_NAME $REDIS_CONTAINER 2>/dev/null || true
+            fi
+            
+            echo "🚀 Starting LOBP Backend container..."
+            docker run -d \
+              --name $BACKEND_CONTAINER \
+              --network $NETWORK_NAME \
+              -e ENVIRONMENT=production \
+              -e DATABASE_URL="postgresql+asyncpg://lobp:${{ secrets.DB_PASSWORD }}@$POSTGRES_CONTAINER:5432/lobp" \
+              -e REDIS_URL="redis://$REDIS_CONTAINER:6379" \
+              -e SECRET_KEY="${{ secrets.APP_SECRET_KEY }}" \
+              -p 5002:8000 \
+              --restart unless-stopped \
+              $BACKEND_IMAGE
+              
+            echo "⏳ Waiting for backend to start..."
+            sleep 10
+            
+            echo "🖥️ Starting LOBP Frontend container..."
+            docker run -d \
+              --name $FRONTEND_CONTAINER \
+              --network $NETWORK_NAME \
+              -p 5001:80 \
+              --restart unless-stopped \
+              $FRONTEND_IMAGE
+              
+            echo "⏳ Waiting for frontend to start..."
+            sleep 10
+            
+            echo "🔍 Checking container status..."
+            
+            # Check Backend
+            if docker ps --format '{{.Names}}' | grep -q "^${BACKEND_CONTAINER}$"; then
+              echo "✅ Backend container is running!"
+              echo "📋 Backend logs (last 10 lines):"
+              docker logs --tail 10 $BACKEND_CONTAINER
+            else
+              echo "❌ Backend container failed to start!"
+              echo "📋 Backend logs:"
+              docker logs $BACKEND_CONTAINER 2>&1 || true
+              exit 1
+            fi
+            
+            # Check Frontend
+            if docker ps --format '{{.Names}}' | grep -q "^${FRONTEND_CONTAINER}$"; then
+              echo "✅ Frontend container is running!"
+              echo "📋 Frontend logs (last 10 lines):"
+              docker logs --tail 10 $FRONTEND_CONTAINER
+            else
+              echo "❌ Frontend container failed to start!"
+              echo "📋 Frontend logs:"
+              docker logs $FRONTEND_CONTAINER 2>&1 || true
+              exit 1
+            fi
+            
+            echo "🔍 Testing endpoints..."
+            
+            # Test backend health
+            if curl -f http://localhost:5002/health >/dev/null 2>&1; then
+              echo "✅ Backend health check passed!"
+            else
+              echo "❌ Backend health check failed!"
+              exit 1
+            fi
+            
+            # Test frontend
+            if curl -f http://localhost:5001/ >/dev/null 2>&1; then
+              echo "✅ Frontend health check passed!"
+            else
+              echo "❌ Frontend health check failed!"
+              exit 1
+            fi
+            
+            echo "✅ LOBP Control System deployment successful!!"
+            echo "🌐 Frontend: http://$(curl -s ifconfig.me):5001"
+            echo "🔌 Backend API: http://$(curl -s ifconfig.me):5002"
