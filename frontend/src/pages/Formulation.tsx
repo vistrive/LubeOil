@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlaskConical, Calculator, Search, Loader2 } from 'lucide-react';
+import { Calculator, Search, Loader2 } from 'lucide-react';
 
 const API_BASE = '/api/v1';
 

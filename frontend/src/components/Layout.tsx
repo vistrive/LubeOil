@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   FlaskConical,
   Container,
-  Blend,
+  Layers,
   TestTube2,
   Bell,
   Settings,
@@ -23,7 +23,7 @@ const navigation = [
   { name: 'Recipes', href: '/recipes', icon: FlaskConical },
   { name: 'Formulation', href: '/formulation', icon: Beaker },
   { name: 'Tanks', href: '/tanks', icon: Container },
-  { name: 'Blends', href: '/blends', icon: Blend },
+  { name: 'Blends', href: '/blends', icon: Layers },
   { name: 'Quality', href: '/quality', icon: TestTube2 },
   { name: 'AI Assistant', href: '/ai-chat', icon: Bot },
 ];
