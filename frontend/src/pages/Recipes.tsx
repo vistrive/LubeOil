@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Plus, Search, Filter, Edit, CheckCircle } from 'lucide-react';
 
 // Mock data
 const recipes = [

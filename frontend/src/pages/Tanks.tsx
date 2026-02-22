@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Container, Thermometer, Droplets, AlertTriangle } from 'lucide-react';
+import { Thermometer, Droplets, AlertTriangle } from 'lucide-react';
 
 // Mock data
 const tanks = [
@@ -65,7 +65,7 @@ const tanks = [
   },
 ];
 
-function TankLevelIndicator({ percent, status }: { percent: number; status: string }) {
+function TankLevelIndicator({ percent }: { percent: number }) {
   const getColor = () => {
     if (percent >= 90) return 'bg-red-400';
     if (percent <= 20) return 'bg-yellow-400';
@@ -147,7 +147,7 @@ export default function Tanks() {
             </div>
 
             <div className="flex gap-4">
-              <TankLevelIndicator percent={tank.levelPercent} status={tank.status} />
+              <TankLevelIndicator percent={tank.levelPercent} />
 
               <div className="flex-1 space-y-2 text-sm">
                 <div>
