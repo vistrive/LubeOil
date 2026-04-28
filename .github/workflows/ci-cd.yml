@@ -107,7 +107,7 @@ jobs:
                 -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
                 -e POSTGRES_DB=lobp \
                 -e PGDATA=/var/lib/postgresql/data/pgdata \
-                -p 5004:5432 \
+                -p 6004:5432 \
                 -v lobp_postgres_data:/var/lib/postgresql/data \
                 --restart unless-stopped \
                 postgres:15-alpine
@@ -144,7 +144,7 @@ jobs:
               -e DATABASE_URL="postgresql+asyncpg://lobp:${{ secrets.DB_PASSWORD }}@$POSTGRES_CONTAINER:5432/lobp" \
               -e REDIS_URL="redis://$REDIS_CONTAINER:6379" \
               -e SECRET_KEY="${{ secrets.APP_SECRET_KEY }}" \
-              -p 5002:8000 \
+              -p 6002:8000 \
               --restart unless-stopped \
               $BACKEND_IMAGE
               
@@ -155,7 +155,7 @@ jobs:
             docker run -d \
               --name $FRONTEND_CONTAINER \
               --network $NETWORK_NAME \
-              -p 5001:80 \
+              -p 6001:80 \
               --restart unless-stopped \
               $FRONTEND_IMAGE
               
@@ -191,7 +191,7 @@ jobs:
             echo "🔍 Testing endpoints..."
             
             # Test backend health
-            if curl -f http://localhost:5002/health >/dev/null 2>&1; then
+            if curl -f http://localhost:6002/health >/dev/null 2>&1; then
               echo "✅ Backend health check passed!"
             else
               echo "❌ Backend health check failed!"

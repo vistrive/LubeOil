@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: lobp
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5004:5432"
+      - "6004:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
@@ -50,7 +50,7 @@ services:
     container_name: lobp-backend
     command: python main.py
     ports:
-      - "5002:8000"
+      - "6002:8000"
     networks:
       - lobp-network
     restart: unless-stopped
@@ -62,7 +62,7 @@ services:
       dockerfile: Dockerfile.frontend
     container_name: lobp-frontend
     ports:
-      - "5001:80"
+      - "6001:80"
     networks:
       - lobp-network
     depends_on:
