@@ -199,7 +199,7 @@ jobs:
             fi
             
             # Test frontend
-            if curl -f http://localhost:5001/ >/dev/null 2>&1; then
+            if curl -f http://localhost:6001/ >/dev/null 2>&1; then
               echo "✅ Frontend health check passed!"
             else
               echo "❌ Frontend health check failed!"
@@ -207,5 +207,5 @@ jobs:
             fi
             
             echo "✅ LOBP Control System deployment successful!!"
-            echo "🌐 Frontend: http://$(curl -s ifconfig.me):5001"
-            echo "🔌 Backend API: http://$(curl -s ifconfig.me):5002"
+            echo "🌐 Frontend: http://$(curl -s ifconfig.me):6001"
+            echo "🔌 Backend API: http://$(curl -s ifconfig.me):6002"
